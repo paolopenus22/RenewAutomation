@@ -5,6 +5,7 @@ using RenewAutomation.TestEndpoints;
 using RestSharp;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace RenewAutomation.Tests
 {
@@ -14,21 +15,21 @@ namespace RenewAutomation.Tests
         private readonly RestClient client = new RestClient();
 
         [TestMethod]
-        public void GetAllPosts()
+        public async Task GetAllPostsAsync()
         {
-            RestRequest request = new RestRequest(Endpoints.GetAllPosts, Method.Get);
-            RestResponse<Posts> response = client.Execute<Posts>(request);
-
+            RestRequest request = new RestRequest(Endpoints.GetAllPosts);
+            RestResponse<Posts> response = await client.ExecuteGetAsync<Posts>(request);
+            
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Status Code is not OK!");
             Assert.IsTrue(response.Content.Contains("userId"), "Response body might be empty!");
         }
         [TestMethod]
-        public void GetPostById()
+        public async Task GetPostByIdAsync()
         {
             string title = "sunt aut facere repellat provident occaecati excepturi optio reprehenderit";
             string body = "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto";
-            RestRequest request = new RestRequest(Endpoints.GetPostById(1), Method.Get);
-            RestResponse<Posts> response = client.Execute<Posts>(request);
+            RestRequest request = new RestRequest(Endpoints.GetPostById(1));
+            RestResponse<Posts> response = await client.ExecuteGetAsync<Posts>(request);
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Status Code is not OK!");
             Assert.AreEqual(1, response.Data.userId, "UserId is not 1");
@@ -37,19 +38,19 @@ namespace RenewAutomation.Tests
             Assert.AreEqual(body, response.Data.body, "Incorrect body");
         }
         [TestMethod]
-        public void GetPostByLetter()
+        public async Task GetPostByLetterAsync()
         {
-            RestRequest request = new RestRequest(Endpoints.GetPostByInvalidId("a"), Method.Get);
-            RestResponse<Posts> response = client.Execute<Posts>(request);
+            RestRequest request = new RestRequest(Endpoints.GetPostByInvalidId("a"));
+            RestResponse<Posts> response = await client.ExecuteGetAsync<Posts>(request);
 
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode, "Status Code is not 'Not Found'");
             Assert.IsTrue(response.Content == "{}", "Content is not blank");
         }
         [TestMethod]
-        public void GetPostComments()
+        public async Task GetPostCommentsAsync()
         {
             RestRequest request = new RestRequest(Endpoints.GetPostComments(1));
-            var response = client.Execute<List<Comments>>(request);
+            var response = await client.ExecuteGetAsync<List<Comments>>(request);
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Status Code is not OK!");
             Assert.AreEqual(5, response.Data.Count, "Incorrect count of data!");
